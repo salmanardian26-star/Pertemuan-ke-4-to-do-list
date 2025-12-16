@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>To Do List Sederhana</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#0b1220;
+      --text:#e6eef9;
+      --muted:#9aa4bd;
+      --accent:#4f46e5;
+      --danger:#ef4444;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg,var(--bg),#020617);
+      color:var(--text);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;max-width:420px;
+      background:var(--card);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 10px 35px rgba(2,6,23,.7);
+    }
+
+    h1{margin:0 0 6px;font-size:22px;text-align:center}
+    .subtitle{margin:0 0 16px;text-align:center;color:var(--muted);font-size:13px}
+
+    .input-row{
+      display:flex;gap:8px;margin-bottom:14px
+    }
+
+    input[type="text"]{
+      flex:1;padding:10px 12px;border-radius:8px;border:1px solid #1e293b;
+      background:#020617;color:var(--text);outline:none
+    }
+
+    button{
+      padding:10px 14px;border-radius:8px;border:none;cursor:pointer;
+      background:var(--accent);color:white;font-weight:600
+    }
+
+    ul{list-style:none;padding:0;margin:0}
+
+    li{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 10px;border-radius:10px;
+      background:#020617;margin-bottom:8px;
+      border:1px solid #1e293b
+    }
+
+    li.done span{text-decoration:line-through;color:var(--muted)}
+
+    li span{flex:1}
+
+    .delete{
+      background:var(--danger);padding:6px 10px;font-size:12px
+    }
+
+    footer{
+      margin-top:14px;font-size:12px;text-align:center;color:var(--muted)
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>To Do List</h1>
+    <p class="subtitle"></p>
+
+    <div class="input-row">
+      <input type="text" id="taskInput" placeholder="Tulis kegiatan...">
+      <button id="addBtn">Tambah</button>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <footer>• Klik tugas untuk menandai selesai •</footer>
+  </main>
+
+  <script>
+    const input = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const taskList = document.getElementById('taskList');
+
+    // Ambil data dari localStorage
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function saveTasks(){
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function render(){
+      taskList.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if(task.done) li.classList.add('done');
+
+        const span = document.createElement('span');
+        span.textContent = task.text;
+
+        // Klik untuk menandai selesai
+        span.addEventListener('click', () => {
+          tasks[index].done = !tasks[index].done;
+          saveTasks();
+          render();
+        });
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Hapus';
+        delBtn.className = 'delete';
+        delBtn.addEventListener('click', () => {
+          tasks.splice(index, 1);
+          saveTasks();
+          render();
+        });
+
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        taskList.appendChild(li);
+      });
+    }
+
+    addBtn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if(text === '') return alert('Tugas tidak boleh kosong!');
+
+      tasks.push({ text, done:false });
+      input.value = '';
+      saveTasks();
+      render();
+    });
+
+    input.addEventListener('keydown', e => {
+      if(e.key === 'Enter') addBtn.click();
+    });
+
+    // tampilkan data awal
+    render();
+  </script>
+</body>
+</html>
